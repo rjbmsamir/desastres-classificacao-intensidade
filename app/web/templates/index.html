@@ -5,21 +5,25 @@
 {% block content %}
 <section class="hero">
     <p class="eyebrow">Classificação de intensidade de desastres</p>
-    <h1>Interface web simples para operar o classificador localmente</h1>
+    <h1>Sistema de Classificação de Intensidade de Desastres</h1>
     <p class="lead">
-        Consulte o estado do modelo, preencha as features manualmente ou envie um arquivo CSV/XLSX
-        para predição em lote.
+        Aplicação para apoio à classificação da intensidade de desastres com base em indicadores
+        socioeconômicos, financeiros e hidrometeorológicos.
+    </p>
+    <p class="lead">
+        Consulte o status do modelo, informe manualmente as variáveis de entrada ou envie um
+        arquivo para processamento em lote.
     </p>
 </section>
 
 <section class="cards">
     <a class="card" href="/web/model-status">
         <h2>Status do modelo</h2>
-        <p>Verifica se o artefato está carregável e exibe classes, features e metadados.</p>
+        <p>Verifica se o modelo está carregado corretamente e exibe classes previstas, variáveis de entrada e metadados.</p>
     </a>
     <a class="card" href="/web/predict-form">
         <h2>Predição manual</h2>
-        <p>Preencha as features obrigatórias no formulário e veja a classe prevista.</p>
+        <p>Informe as variáveis de entrada obrigatórias no formulário e veja a classe prevista.</p>
     </a>
     <a class="card" href="/web/predict-file">
         <h2>Predição por arquivo</h2>

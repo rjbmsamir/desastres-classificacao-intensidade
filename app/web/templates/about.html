@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre o Sistema{% endblock %}
+
+{% block content %}
+<style>
+    .about-wrap {
+        max-width: 820px;
+        margin: 0 auto;
+    }
+
+    .about-hero,
+    .about-section {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 1rem;
+        box-shadow: 0 10px 24px rgba(74, 54, 28, 0.06);
+    }
+
+    .about-hero {
+        padding: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .about-section {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .about-kicker {
+        margin: 0 0 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 0.8rem;
+        color: var(--accent);
+    }
+
+    .about-wrap h1,
+    .about-wrap h2,
+    .about-wrap h3 {
+        line-height: 1.2;
+    }
+
+    .about-wrap h1 {
+        margin: 0 0 0.75rem;
+        font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .about-wrap h2 {
+        margin: 0 0 0.85rem;
+        font-size: 1.5rem;
+    }
+
+    .about-wrap h3 {
+        margin: 1.25rem 0 0.45rem;
+        font-size: 1.15rem;
+    }
+
+    .about-wrap p,
+    .about-wrap li {
+        color: var(--muted);
+        line-height: 1.75;
+        font-size: 1.03rem;
+    }
+
+    .about-wrap ul,
+    .about-wrap ol {
+        padding-left: 1.35rem;
+        margin: 0.75rem 0 0;
+    }
+
+    .about-wrap .lead {
+        color: var(--text);
+        font-size: 1.08rem;
+    }
+
+    .about-wrap .citation {
+        padding: 1rem 1.1rem;
+        background: var(--accent-soft);
+        border-left: 4px solid var(--accent);
+        border-radius: 0.75rem;
+        overflow-wrap: anywhere;
+    }
+</style>
+
+<div class="about-wrap">
+    <section class="about-hero">
+        <p class="about-kicker">Sobre o Sistema</p>
+        <h1>Classificador de Intensidade de Desastres</h1>
+        <p class="lead">
+            Este sistema implementa um modelo de classificação de intensidade de desastres desenvolvido para apoiar a análise técnica de eventos registrados no sistema de proteção e defesa civil.
+        </p>
+        <p>
+            A ferramenta utiliza métodos estatísticos multivariados para identificar padrões entre variáveis socioeconômicas, territoriais e de impacto associadas a eventos hidrometeorológicos.
+        </p>
+        <p>
+            O objetivo principal é fornecer um instrumento analítico auxiliar que permita avaliar, de forma estruturada, a severidade de desastres registrados e apoiar processos de planejamento, priorização de recursos e análise de impactos.
+        </p>
+        <p>
+            O sistema foi concebido como uma interface experimental para execução local de um classificador estatístico baseado em dados históricos de desastres registrados no Brasil.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Propósito institucional</h2>
+        <ol>
+            <li>explicar o propósito do sistema;</li>
+            <li>tornar o modelo cientificamente auditável;</li>
+            <li>registrar escopo e limitações de uso.</li>
+        </ol>
+    </section>
+
+    <section class="about-section">
+        <h2>Base Científica</h2>
+        <p>O modelo utilizado neste sistema foi desenvolvido a partir da pesquisa científica intitulada:</p>
+        <p><strong>O emprego de análise por principais componentes na instrumentalização de classificadores de desastres.</strong></p>
+        <p>
+            O estudo buscou enfrentar a crescente complexidade da análise de desastres, propondo uma abordagem baseada em análise estatística multivariada para classificar eventos de acordo com sua intensidade e impacto nos municípios.
+        </p>
+        <p>
+            A pesquisa utilizou dados do Sistema Integrado de Informações sobre Desastres (S2ID) referentes a desastres reconhecidos no estado do Rio de Janeiro. O objetivo foi identificar padrões estruturais entre variáveis relacionadas à ocorrência e aos impactos dos eventos.
+        </p>
+        <p>
+            A contribuição central do estudo consiste no desenvolvimento de um modelo classificatório capaz de apoiar estratégias de planejamento, prevenção e resposta a desastres no contexto da proteção e defesa civil.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Metodologia Utilizada</h2>
+        <p>
+            O modelo foi construído a partir de um conjunto de 96 processos de desastres registrados no S2ID. Esses registros foram selecionados considerando eventos associados a precipitação pluviométrica e com informações completas sobre impactos e variáveis socioeconômicas.
+        </p>
+        <p>Foram analisadas diversas variáveis relacionadas ao contexto territorial e aos impactos do desastre, incluindo:</p>
+        <ul>
+            <li>população municipal</li>
+            <li>área territorial</li>
+            <li>orçamento anual municipal</li>
+            <li>receita anual</li>
+            <li>danos e prejuízos estimados</li>
+            <li>número de pessoas afetadas</li>
+            <li>precipitação pluviométrica em 24 horas</li>
+            <li>densidade populacional</li>
+            <li>capacidade financeira de resposta ao desastre</li>
+        </ul>
+        <p>
+            Essas variáveis foram submetidas a um processo de Análise Fatorial por Componentes Principais (Principal Component Analysis – PCA) com o objetivo de reduzir a dimensionalidade dos dados e identificar estruturas de correlação entre os indicadores analisados.
+        </p>
+        <p>
+            O modelo resultante identificou quatro componentes principais, responsáveis por explicar mais de 70% da variabilidade observada nos dados. Esses componentes foram posteriormente utilizados para realizar agrupamentos estatísticos entre eventos de desastre.
+        </p>
+        <p>
+            Com base nesse procedimento, foi possível identificar diferentes classes de intensidade de desastres, representando padrões de impacto distintos entre os eventos analisados.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Classes de Intensidade de Desastres</h2>
+        <p>
+            A análise permitiu identificar agrupamentos de eventos que podem ser interpretados como níveis distintos de intensidade.
+        </p>
+
+        <h3>Nível 1</h3>
+        <p>
+            Eventos com menor impacto socioeconômico e menor comprometimento da capacidade de resposta municipal. Esses eventos normalmente podem ser gerenciados com recursos locais. A depender da legislação em vigor os eventos devem ser gerenciados com recursos locais.
+        </p>
+
+        <h3>Nível 2</h3>
+        <p>Eventos com impacto intermediário e maior demanda de recursos institucionais.</p>
+
+        <h3>Nível 3</h3>
+        <p>
+            Esses eventos frequentemente comprometem significativamente a capacidade local de resposta e exigem atuação coordenada entre diferentes níveis de governo.
+        </p>
+
+        <h3>Eventos raros</h3>
+        <p>
+            O modelo também identificou um conjunto de eventos estatisticamente raros que não se ajustam claramente às classes principais e demandam avaliação técnica específica.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Tipos de Desastre Considerados</h2>
+        <p>
+            O modelo foi desenvolvido a partir de desastres relacionados à precipitação intensa, incluindo:
+        </p>
+        <ul>
+            <li>tempestades convectivas ou chuvas intensas</li>
+            <li>frentes frias ou zonas de convergência</li>
+            <li>inundações</li>
+            <li>enxurradas</li>
+            <li>deslizamentos associados a precipitação</li>
+        </ul>
+        <p>
+            Esses eventos apresentam características mensuráveis que permitem análise estatística baseada em dados históricos.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Limitações</h2>
+        <p>Algumas limitações metodológicas devem ser consideradas ao utilizar este sistema.</p>
+        <p>
+            A base de dados utilizada possui recorte geográfico específico, concentrando-se em eventos registrados no estado do Rio de Janeiro. Além disso, apenas eventos com informações completas nas variáveis analisadas foram considerados na modelagem.
+        </p>
+        <p>
+            Desastres de evolução lenta ou que não estejam diretamente relacionados à precipitação não foram incluídos na análise original.
+        </p>
+        <p>
+            Outro aspecto relevante refere-se à dependência da qualidade e da disponibilidade dos dados registrados nos sistemas oficiais de gestão de desastres. A ausência ou inconsistência de dados pode afetar a representatividade das análises realizadas.
+        </p>
+        <p>
+            Dessa forma, os resultados gerados pelo sistema devem ser interpretados como apoio analítico à tomada de decisão, e não como substituição da avaliação técnica realizada por profissionais da proteção e defesa civil.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Uso do Sistema</h2>
+        <p>Este sistema permite realizar classificações experimentais por dois modos principais:</p>
+        <ul>
+            <li>inserção manual de variáveis do evento</li>
+            <li>envio de arquivos para classificação em lote</li>
+        </ul>
+        <p>
+            Os resultados indicam a classe estatística de intensidade associada ao conjunto de variáveis informado.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>Como citar</h2>
+        <div class="citation">
+            <p>
+                Caso utilize este sistema em pesquisas, relatórios ou aplicações institucionais, recomenda-se citar o estudo científico que fundamenta o modelo:
+            </p>
+            <p>
+                Fernandes, S. B.; Carvalho, W. A.; Santos, M.<br>
+                <em>O emprego de análise por principais componentes na instrumentalização de classificadores de desastres.</em><br>
+                Revista Flammae.<br>
+                DOI:<br>
+                <a href="https://doi.org/10.56081/2359-4837/flammae.v10n29.a1" target="_blank" rel="noopener noreferrer">https://doi.org/10.56081/2359-4837/flammae.v10n29.a1</a>
+            </p>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <h2>Versão do Modelo</h2>
+        <p>Modelo estatístico baseado em PCA e análise de agrupamentos.</p>
+        <p>Versão experimental para uso analítico e educacional.</p>
+    </section>
+</div>
+{% endblock %}

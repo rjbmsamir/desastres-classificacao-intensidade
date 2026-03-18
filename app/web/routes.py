@@ -85,6 +85,12 @@ def web_home() -> RedirectResponse:
     return RedirectResponse(url="/", status_code=302)
 
 
+@router.get("/about", response_class=HTMLResponse)
+def about(request: Request) -> HTMLResponse:
+    """Exibe a página institucional do sistema."""
+    return templates.TemplateResponse("about.html", _base_context(request))
+
+
 @router.get("/web/model-status", response_class=HTMLResponse)
 def model_status(request: Request) -> HTMLResponse:
     """Exibe o estado atual do artefato do modelo."""

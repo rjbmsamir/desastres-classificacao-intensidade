@@ -5,7 +5,7 @@
 {% block content %}
 <section class="panel">
     <h1>Predição por upload de arquivo</h1>
-    <p>Envie um arquivo CSV ou XLSX contendo as features obrigatórias do modelo.</p>
+    <p>Envie um arquivo CSV ou XLSX contendo as variáveis de entrada obrigatórias do modelo.</p>
 
     <form method="post" action="/web/predict-file" enctype="multipart/form-data" class="upload-form">
         <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
