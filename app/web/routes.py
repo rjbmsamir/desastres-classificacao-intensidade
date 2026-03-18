@@ -1,7 +1,7 @@
 """Rotas web simples para operação manual do sistema."""
-from pathlib import Path
 from __future__ import annotations
 
+from pathlib import Path
 import io
 from typing import Any, Dict
 from uuid import uuid4
