@@ -12,7 +12,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 
 from app.core.config import SHEET_NAME
-from app.core.features import FEATURES, MissingColumnsError, to_display_label
+from app.core.features import (
+    DIRECT_INPUT_FEATURES,
+    DERIVED_FEATURE_SPECS,
+    DerivedFeaturesError,
+    MissingColumnsError,
+    to_display_label,
+)
 from app.core.model import ModelNotFoundError
 from app.services.prediction_service import (
     build_prediction_items,
@@ -30,13 +36,48 @@ TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 router = APIRouter(include_in_schema=False)
 _DOWNLOAD_CACHE: dict[str, bytes] = {}
+FIELD_LABELS = {
+    "População": "População",
+    "Área_km": "Área (km²)",
+    "Receita.Anual": "Receita anual",
+    "Orçamento.anual": "Orçamento anual",
+    "Danos.e.Prejuízos": "Danos e prejuízos",
+    "Afetados": "Afetados",
+    "Precipitação.pluviométrica": "Precipitação pluviométrica",
+    "Densidade.populacional": "Densidade populacional",
+    "Capacidade.de.investimento.na.resposta.ao.desastre": "Capacidade de investimento na resposta",
+    "Capacidade.de.projeção.financeira": "Capacidade de projeção financeira",
+    "Densidade.populacional.de.afetados": "Densidade populacional de afetados",
+}
+
+
+def _build_manual_fields() -> list[dict[str, str]]:
+    return [{"name": feature, "label": FIELD_LABELS.get(feature, feature)} for feature in DIRECT_INPUT_FEATURES]
+
+
+def _build_derived_fields() -> list[dict[str, str]]:
+    fields = []
+    for feature, spec in DERIVED_FEATURE_SPECS.items():
+        fields.append(
+            {
+                "name": feature,
+                "label": FIELD_LABELS.get(feature, feature),
+                "numerator": spec["numerator"],
+                "denominator": spec["denominator"],
+                "formula": f"{FIELD_LABELS.get(spec['numerator'], spec['numerator'])} / "
+                f"{FIELD_LABELS.get(spec['denominator'], spec['denominator'])}",
+            }
+        )
+    return fields
 
 
 def _base_context(request: Request, **extra: Any) -> Dict[str, Any]:
     """Cria o contexto base compartilhado pelos templates."""
     return {
         "request": request,
-        "features": FEATURES,
+        "features": DIRECT_INPUT_FEATURES,
+        "manual_fields": _build_manual_fields(),
+        "derived_fields": _build_derived_fields(),
         **extra,
     }
 
@@ -45,7 +86,7 @@ def _parse_manual_form(form_data) -> pd.DataFrame:
     """Converte os campos do formulário manual em DataFrame."""
     payload: Dict[str, float] = {}
     errors = []
-    for feature in FEATURES:
+    for feature in DIRECT_INPUT_FEATURES:
         raw_value = str(form_data.get(feature, "")).strip()
         if raw_value == "":
             errors.append(f"O campo '{feature}' é obrigatório.")
@@ -119,7 +160,7 @@ def predict_form_page(request: Request) -> HTMLResponse:
         "predict_form.html",
         _base_context(
             request,
-            form_values={feature: "" for feature in FEATURES},
+            form_values={feature: "" for feature in DIRECT_INPUT_FEATURES},
             prediction=None,
             error_message=None,
         ),
@@ -130,7 +171,7 @@ def predict_form_page(request: Request) -> HTMLResponse:
 async def predict_form_submit(request: Request) -> HTMLResponse:
     """Processa a submissão manual de features pelo navegador."""
     form = await request.form()
-    form_values = {feature: str(form.get(feature, "")) for feature in FEATURES}
+    form_values = {feature: str(form.get(feature, "")) for feature in DIRECT_INPUT_FEATURES}
     try:
         df = _parse_manual_form(form)
         result = predict_from_dataframe(
@@ -153,7 +194,7 @@ async def predict_form_submit(request: Request) -> HTMLResponse:
                 error_message=None,
             ),
         )
-    except (ValueError, MissingColumnsError, ModelNotFoundError) as exc:
+    except (ValueError, DerivedFeaturesError, MissingColumnsError, ModelNotFoundError) as exc:
         status_code = 404 if isinstance(exc, ModelNotFoundError) else 400
         return templates.TemplateResponse(
             "predict_form.html",
@@ -205,7 +246,7 @@ async def predict_file_submit(request: Request, file: UploadFile) -> HTMLRespons
             "total_rows": len(df),
             "total_processed": len(result_df),
             "columns_received": list(df.columns),
-            "required_columns": list(FEATURES),
+            "required_columns": list(DIRECT_INPUT_FEATURES),
         }
         return templates.TemplateResponse(
             "predict_file.html",
@@ -220,6 +261,7 @@ async def predict_file_submit(request: Request, file: UploadFile) -> HTMLRespons
     except (
         EmptyFileError,
         UnsupportedFileFormatError,
+        DerivedFeaturesError,
         FileParsingError,
         MissingColumnsError,
         ModelNotFoundError,

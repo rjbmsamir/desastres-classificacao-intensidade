@@ -6,45 +6,104 @@
 <section class="panel">
     <h1>Status do modelo</h1>
     {% if model_info %}
-    <dl class="meta-grid">
-        <div>
-            <dt>Modelo carregado</dt>
-            <dd>{{ "Sim" if model_info.model_loaded else "Não" }}</dd>
-        </div>
-        <div>
-            <dt>Caminho do artefato</dt>
-            <dd>{{ model_info.artifact_path }}</dd>
-        </div>
-        <div>
-            <dt>Run ID</dt>
-            <dd>{{ model_info.run_id or "-" }}</dd>
-        </div>
-        <div>
-            <dt>Algoritmo</dt>
-            <dd>{{ model_info.algorithm or "-" }}</dd>
-        </div>
-    </dl>
+    <div class="status-summary-grid">
+        <section class="status-summary-card">
+            <h2>Modelo carregado</h2>
+            <p class="status-highlight">{{ "Sim" if model_info.model_loaded else "Não" }}</p>
+            <p class="status-copy">Artefato disponível para inferência na aplicação.</p>
+        </section>
 
-    <h2>Classes previstas</h2>
-    <ul class="chip-list">
-        {% for label in model_info.class_labels %}
-        <li>{{ label }}</li>
-        {% endfor %}
-    </ul>
+        <section class="status-summary-card">
+            <h2>Classes previstas</h2>
+            <ul class="class-list">
+                <li>Nível 1</li>
+                <li>Nível 2</li>
+                <li>Nível 3</li>
+                <li>Raro</li>
+            </ul>
+        </section>
+    </div>
 
-    <h2>Variáveis de entrada esperadas</h2>
-    <ul class="feature-list">
-        {% for feature in model_info.features %}
-        <li>{{ feature }}</li>
-        {% endfor %}
-    </ul>
+    <section class="model-section">
+        <h2>Variáveis de entrada esperadas</h2>
+        <p class="section-intro">
+            As variáveis abaixo representam os principais indicadores utilizados pelo modelo para classificação da intensidade de desastres.
+            Parte dessas variáveis é informada diretamente pelo usuário, enquanto outras são calculadas automaticamente pelo sistema a partir das entradas fornecidas.
+        </p>
 
-    <h2>Metadados disponíveis</h2>
-    <ul class="feature-list">
-        {% for key in model_info.metadata_keys %}
-        <li>{{ key }}</li>
-        {% endfor %}
-    </ul>
+        <div class="input-groups">
+            <section class="input-group-card">
+                <h3>Variáveis informadas pelo usuário</h3>
+
+                <article class="feature-entry">
+                    <h4>População</h4>
+                    <p>Número total de habitantes do município afetado pelo desastre. Esse valor é utilizado para contextualizar o impacto do evento em relação ao tamanho da população exposta.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Área</h4>
+                    <p>Extensão territorial do município, expressa em quilômetros quadrados (km²). Essa variável permite calcular indicadores espaciais relacionados à densidade populacional.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Receita anual</h4>
+                    <p>Valor total de receita arrecadada pelo município no exercício fiscal. Esse indicador representa a capacidade financeira municipal disponível para resposta e recuperação após desastres.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Orçamento anual</h4>
+                    <p>Valor total previsto no orçamento municipal para o exercício fiscal. Essa variável é utilizada para avaliar a relação entre planejamento financeiro e arrecadação efetiva.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Danos e prejuízos</h4>
+                    <p>Valor monetário estimado dos danos e prejuízos causados pelo desastre. Esse indicador representa o impacto econômico do evento no território afetado.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Afetados</h4>
+                    <p>Número total de pessoas impactadas pelo desastre, incluindo desalojados, desabrigados ou pessoas que sofreram algum tipo de impacto direto decorrente do evento.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Precipitação pluviométrica (24 h)</h4>
+                    <p>Quantidade de precipitação acumulada em milímetros no período de 24 horas associada ao evento adverso.</p>
+                </article>
+            </section>
+
+            <section class="input-group-card input-group-card-derived">
+                <h3>Variáveis calculadas automaticamente</h3>
+
+                <article class="feature-entry">
+                    <h4>Densidade populacional</h4>
+                    <p>Indicador que representa a concentração de habitantes no território municipal.</p>
+                    <p class="feature-formula">Cálculo automático realizado pelo sistema: População ÷ Área</p>
+                    <p class="feature-note">Variável derivada; cálculo automático pelo sistema; não requer entrada manual.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Capacidade de investimento na resposta ao desastre</h4>
+                    <p>Indicador que representa a relação entre a capacidade financeira municipal e os prejuízos causados pelo desastre.</p>
+                    <p class="feature-formula">Cálculo automático realizado pelo sistema: Receita anual ÷ Danos e prejuízos</p>
+                    <p class="feature-note">Variável derivada; cálculo automático pelo sistema; não requer entrada manual.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Capacidade de projeção financeira</h4>
+                    <p>Indicador que representa a relação entre arrecadação municipal e o orçamento planejado.</p>
+                    <p class="feature-formula">Cálculo automático realizado pelo sistema: Receita anual ÷ Orçamento anual</p>
+                    <p class="feature-note">Variável derivada; cálculo automático pelo sistema; não requer entrada manual.</p>
+                </article>
+
+                <article class="feature-entry">
+                    <h4>Densidade populacional de afetados</h4>
+                    <p>Indicador que representa a proporção da população municipal impactada pelo desastre.</p>
+                    <p class="feature-formula">Cálculo automático realizado pelo sistema: Afetados ÷ População</p>
+                    <p class="feature-note">Variável derivada; cálculo automático pelo sistema; não requer entrada manual.</p>
+                </article>
+            </section>
+        </div>
+    </section>
     {% else %}
     <p>O artefato do modelo não pôde ser carregado.</p>
     {% endif %}

@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, UploadFile
 
 from app.core.config import SHEET_NAME
-from app.core.features import FEATURES
+from app.core.features import DIRECT_INPUT_FEATURES
 from app.schemas.prediction import PredictionItemResponse
 from app.schemas.prediction_file import PredictionFileResponse
 from app.services.prediction_service import build_prediction_items, predict_from_dataframe
@@ -37,6 +37,6 @@ async def predict_file(
         total_rows=len(df),
         total_processed=len(predictions),
         columns_received=list(df.columns),
-        required_columns=list(FEATURES),
+        required_columns=list(DIRECT_INPUT_FEATURES),
         predictions=predictions,
     )

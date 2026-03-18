@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, List, Optional
 import pandas as pd
 
 from app.core.config import MODEL_PATH, SHEET_NAME, TARGET_COLUMN
-from app.core.features import encode_target, ensure_valid_features, to_display_label
+from app.core.features import compute_derived_features, encode_target, ensure_valid_features, to_display_label
 from app.core.model import ModelArtifact, extract_class_probabilities, load_model_artifact
 from app.services.tracking import ExperimentTracker, NullExperimentTracker
 from app.utils.dataframe_io import load_dataframe
@@ -113,6 +113,7 @@ def predict_from_dataframe(
 ) -> pd.DataFrame:
     """Executa inferência sobre um DataFrame já carregado."""
     artifact = load_model_artifact(model_path)
+    df = compute_derived_features(df)
     ensure_valid_features(df)
     X = df[artifact.features].copy()
     preds = artifact.pipeline.predict(X)

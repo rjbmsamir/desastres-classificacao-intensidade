@@ -1,21 +1,45 @@
 """Definições de features e utilitários de validação."""
 from __future__ import annotations
 
-from typing import List
+from typing import Dict, List
 
-FEATURES: List[str] = [
+import pandas as pd
+
+BASE_FEATURES: List[str] = [
     "População",
     "Área_km",
     "Receita.Anual",
     "Orçamento.anual",
     "Danos.e.Prejuízos",
     "Afetados",
-    "Precipitação.pluviométrica",
+]
+DIRECT_INPUT_FEATURES: List[str] = BASE_FEATURES + ["Precipitação.pluviométrica"]
+DERIVED_FEATURES: List[str] = [
     "Densidade.populacional",
     "Capacidade.de.investimento.na.resposta.ao.desastre",
     "Capacidade.de.projeção.financeira",
     "Densidade.populacional.de.afetados",
 ]
+FEATURES: List[str] = DIRECT_INPUT_FEATURES + DERIVED_FEATURES
+
+DERIVED_FEATURE_SPECS: Dict[str, Dict[str, str]] = {
+    "Densidade.populacional": {
+        "numerator": "População",
+        "denominator": "Área_km",
+    },
+    "Capacidade.de.investimento.na.resposta.ao.desastre": {
+        "numerator": "Receita.Anual",
+        "denominator": "Danos.e.Prejuízos",
+    },
+    "Capacidade.de.projeção.financeira": {
+        "numerator": "Receita.Anual",
+        "denominator": "Orçamento.anual",
+    },
+    "Densidade.populacional.de.afetados": {
+        "numerator": "Afetados",
+        "denominator": "População",
+    },
+}
 
 LEVEL_MAP = {
     "1": "nivel_I",
@@ -38,6 +62,78 @@ class MissingColumnsError(ValueError):
     def __init__(self, missing_columns: List[str]) -> None:
         self.missing_columns = missing_columns
         super().__init__(f"Colunas faltando: {missing_columns}")
+
+
+class DerivedFeaturesError(ValueError):
+    """Disparado quando não é possível calcular as variáveis derivadas."""
+
+
+def _missing_row_indexes(series: pd.Series) -> List[int]:
+    return series[series.isna()].index.tolist()
+
+
+def compute_derived_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Calcula variáveis derivadas sem sobrescrever payloads antigos já completos."""
+    enriched = df.copy()
+    relevant_columns = {
+        spec["numerator"] for spec in DERIVED_FEATURE_SPECS.values()
+    } | {
+        spec["denominator"] for spec in DERIVED_FEATURE_SPECS.values()
+    } | set(DERIVED_FEATURES)
+
+    for column in relevant_columns:
+        if column in enriched.columns:
+            enriched[column] = pd.to_numeric(enriched[column], errors="coerce")
+
+    errors: List[str] = []
+
+    for derived_feature, spec in DERIVED_FEATURE_SPECS.items():
+        numerator = spec["numerator"]
+        denominator = spec["denominator"]
+
+        if derived_feature not in enriched.columns:
+            enriched[derived_feature] = pd.Series(pd.NA, index=enriched.index, dtype="Float64")
+
+        missing_mask = enriched[derived_feature].isna()
+        if not missing_mask.any():
+            continue
+
+        if numerator not in enriched.columns or denominator not in enriched.columns:
+            errors.append(
+                f"Não foi possível calcular '{derived_feature}' sem as colunas '{numerator}' e '{denominator}'."
+            )
+            continue
+
+        missing_inputs = missing_mask & (enriched[numerator].isna() | enriched[denominator].isna())
+        if missing_inputs.any():
+            errors.append(
+                f"Não foi possível calcular '{derived_feature}' por valores ausentes nas linhas "
+                f"{missing_inputs[missing_inputs].index.tolist()}."
+            )
+
+        zero_division = missing_mask & ~missing_inputs & enriched[denominator].eq(0)
+        if zero_division.any():
+            errors.append(
+                f"Não foi possível calcular '{derived_feature}' por divisão por zero em '{denominator}' nas linhas "
+                f"{zero_division[zero_division].index.tolist()}."
+            )
+
+        calculable_mask = missing_mask & ~missing_inputs & ~zero_division
+
+        enriched.loc[calculable_mask, derived_feature] = (
+            enriched.loc[calculable_mask, numerator] / enriched.loc[calculable_mask, denominator]
+        )
+
+        unresolved_rows = _missing_row_indexes(enriched.loc[calculable_mask, derived_feature])
+        if unresolved_rows:
+            errors.append(
+                f"Não foi possível calcular '{derived_feature}' nas linhas {unresolved_rows}."
+            )
+
+    if errors:
+        raise DerivedFeaturesError(" ".join(errors))
+
+    return enriched
 
 
 def check_columns(df) -> List[str]:

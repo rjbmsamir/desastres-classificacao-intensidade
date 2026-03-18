@@ -5,15 +5,46 @@
 {% block content %}
 <section class="panel">
     <h1>Predição manual</h1>
-    <p>Preencha as variáveis de entrada abaixo para obter a classe prevista e as probabilidades por classe.</p>
+    <p>Preencha apenas as variáveis base. Os indicadores derivados são recalculados automaticamente no navegador e novamente no backend antes da predição.</p>
 
-    <form method="post" action="/web/predict-form" class="form-grid">
-        {% for feature in features %}
+    <form method="post" action="/web/predict-form" class="prediction-layout" data-derived-form>
+        <div class="form-grid">
+        {% for field in manual_fields %}
         <label class="field">
-            <span>{{ feature }}</span>
-            <input type="text" name="{{ feature }}" value="{{ form_values.get(feature, '') }}" placeholder="Valor numérico">
+            <span>{{ field.label }}</span>
+            <input
+                type="text"
+                name="{{ field.name }}"
+                value="{{ form_values.get(field.name, '') }}"
+                placeholder="Valor numérico"
+                inputmode="decimal"
+                data-base-field="{{ field.name }}">
         </label>
         {% endfor %}
+        </div>
+
+        <aside class="derived-panel">
+            <div class="derived-panel-header">
+                <h2>Indicadores calculados automaticamente</h2>
+                <p>Esta área mostra a composição final usada na predição.</p>
+            </div>
+            <div class="derived-grid">
+                {% for field in derived_fields %}
+                <section
+                    class="derived-card"
+                    data-derived-card
+                    data-field-name="{{ field.name }}"
+                    data-numerator="{{ field.numerator }}"
+                    data-denominator="{{ field.denominator }}">
+                    <p class="derived-label">{{ field.label }}</p>
+                    <p class="derived-value" data-derived-value>Preencha os campos base</p>
+                    <p class="derived-formula">{{ field.formula }}</p>
+                    <p class="derived-status" data-derived-status>Aguardando dados válidos.</p>
+                </section>
+                {% endfor %}
+            </div>
+        </aside>
+
         <div class="actions">
             <button type="submit">Executar predição</button>
         </div>
@@ -42,4 +73,83 @@
     </table>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+    const form = document.querySelector("[data-derived-form]");
+    if (!form) {
+        return;
+    }
+
+    const baseInputs = Array.from(form.querySelectorAll("[data-base-field]"));
+    const derivedCards = Array.from(form.querySelectorAll("[data-derived-card]"));
+
+    function parseNumericValue(rawValue) {
+        const normalized = String(rawValue || "").trim().replace(",", ".");
+        if (!normalized) {
+            return { ok: false, reason: "empty" };
+        }
+        const value = Number(normalized);
+        if (!Number.isFinite(value)) {
+            return { ok: false, reason: "invalid" };
+        }
+        return { ok: true, value };
+    }
+
+    function formatNumber(value) {
+        return new Intl.NumberFormat("pt-BR", {
+            maximumFractionDigits: 6,
+        }).format(value);
+    }
+
+    function updateDerivedFields() {
+        const parsedValues = {};
+        for (const input of baseInputs) {
+            parsedValues[input.dataset.baseField] = parseNumericValue(input.value);
+        }
+
+        for (const card of derivedCards) {
+            const numeratorKey = card.dataset.numerator;
+            const denominatorKey = card.dataset.denominator;
+            const numerator = parsedValues[numeratorKey];
+            const denominator = parsedValues[denominatorKey];
+            const valueNode = card.querySelector("[data-derived-value]");
+            const statusNode = card.querySelector("[data-derived-status]");
+
+            card.classList.remove("is-error", "is-ready");
+
+            if (!numerator?.ok || !denominator?.ok) {
+                valueNode.textContent = "Aguardando cálculo";
+                if (numerator?.reason === "invalid" || denominator?.reason === "invalid") {
+                    statusNode.textContent = "Corrija os campos base com valor numérico válido.";
+                    card.classList.add("is-error");
+                } else {
+                    statusNode.textContent = "Preencha os campos necessários para calcular.";
+                }
+                continue;
+            }
+
+            if (denominator.value === 0) {
+                valueNode.textContent = "Indisponível";
+                statusNode.textContent = "Não é possível dividir por zero.";
+                card.classList.add("is-error");
+                continue;
+            }
+
+            const result = numerator.value / denominator.value;
+            valueNode.textContent = formatNumber(result);
+            statusNode.textContent = "Valor pronto para conferência.";
+            card.classList.add("is-ready");
+        }
+    }
+
+    for (const input of baseInputs) {
+        input.addEventListener("input", updateDerivedFields);
+    }
+
+    updateDerivedFields();
+})();
+</script>
 {% endblock %}
