@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Projeto Desastres{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="shell">
+            <a class="brand" href="/">Projeto Desastres</a>
+            <nav class="nav">
+                <a href="/web/model-status">Status do modelo</a>
+                <a href="/web/predict-form">Predição manual</a>
+                <a href="/web/predict-file">Predição por arquivo</a>
+                <a href="/docs">Swagger</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="shell page">
+        {% if error_message %}
+        <div class="alert alert-error">{{ error_message }}</div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

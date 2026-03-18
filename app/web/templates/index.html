@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Projeto Desastres{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <p class="eyebrow">Classificação de intensidade de desastres</p>
+    <h1>Interface web simples para operar o classificador localmente</h1>
+    <p class="lead">
+        Consulte o estado do modelo, preencha as features manualmente ou envie um arquivo CSV/XLSX
+        para predição em lote.
+    </p>
+</section>
+
+<section class="cards">
+    <a class="card" href="/web/model-status">
+        <h2>Status do modelo</h2>
+        <p>Verifica se o artefato está carregável e exibe classes, features e metadados.</p>
+    </a>
+    <a class="card" href="/web/predict-form">
+        <h2>Predição manual</h2>
+        <p>Preencha as features obrigatórias no formulário e veja a classe prevista.</p>
+    </a>
+    <a class="card" href="/web/predict-file">
+        <h2>Predição por arquivo</h2>
+        <p>Envie CSV ou XLSX para processar múltiplos registros e baixar o resultado em CSV.</p>
+    </a>
+</section>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Predição por Arquivo{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Predição por upload de arquivo</h1>
+    <p>Envie um arquivo CSV ou XLSX contendo as features obrigatórias do modelo.</p>
+
+    <form method="post" action="/web/predict-file" enctype="multipart/form-data" class="upload-form">
+        <input type="file" name="file" accept=".csv,.xlsx,.xls" required>
+        <button type="submit">Processar arquivo</button>
+    </form>
+</section>
+
+{% if result %}
+<section class="panel">
+    <h2>Resumo do processamento</h2>
+    <dl class="meta-grid">
+        <div>
+            <dt>Arquivo</dt>
+            <dd>{{ result.filename }}</dd>
+        </div>
+        <div>
+            <dt>Total de linhas</dt>
+            <dd>{{ result.total_rows }}</dd>
+        </div>
+        <div>
+            <dt>Total processado</dt>
+            <dd>{{ result.total_processed }}</dd>
+        </div>
+    </dl>
+
+    <p><strong>Colunas recebidas:</strong> {{ result.columns_received|join(", ") }}</p>
+    <p><strong>Colunas obrigatórias:</strong> {{ result.required_columns|join(", ") }}</p>
+
+    {% if download_token %}
+    <p><a class="button-link" href="/web/download/{{ download_token }}">Baixar resultado processado em CSV</a></p>
+    {% endif %}
+    <h2>Pré-visualização</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Linha</th>
+                    <th>Classe prevista</th>
+                    <th>Probabilidades</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in preview_rows %}
+                <tr>
+                    <td>{{ row.row_index }}</td>
+                    <td>{{ row.y_pred_display }}</td>
+                    <td>
+                        {% for label, value in row.probabilities.items() %}
+                        <div>{{ label }}: {{ "%.4f"|format(value) if value is not none else "-" }}</div>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
 
@@ -28,9 +28,40 @@ CANONICAL_MAP = {
 }
 
 
+def _normalize_response_value(value: Any) -> Any:
+    """Normaliza valores para serialização JSON segura."""
+    if pd.isna(value):
+        return None
+    if hasattr(value, "item"):
+        try:
+            return value.item()
+        except Exception:  # noqa: BLE001
+            return value
+    return value
+
+
 def load_trained_model(model_path: Path = MODEL_PATH) -> ModelArtifact:
     """Carrega o artefato treinado do modelo."""
     return load_model_artifact(model_path)
+
+
+def get_model_info(model_path: Path = MODEL_PATH) -> Dict[str, Any]:
+    """Retorna metadados resumidos do artefato do modelo."""
+    artifact = load_model_artifact(model_path)
+    algorithm = None
+    if hasattr(artifact.pipeline, "named_steps"):
+        estimator = artifact.pipeline.named_steps.get("clf")
+        if estimator is not None:
+            algorithm = type(estimator).__name__
+    return {
+        "model_loaded": True,
+        "artifact_path": str(model_path),
+        "run_id": artifact.run_id,
+        "class_labels": artifact.class_labels,
+        "features": artifact.features,
+        "metadata_keys": sorted(artifact.metadata.keys()),
+        "algorithm": algorithm,
+    }
 
 
 def _resolve_true_labels(df: pd.DataFrame) -> List[Optional[str]]:
@@ -129,3 +160,26 @@ def predict_from_file(
         run_id=run_id,
         tracker=tracker,
     )
+
+
+def build_prediction_items(result: pd.DataFrame, *, input_columns: List[str]) -> List[Dict[str, Any]]:
+    """Converte o DataFrame de saída em itens serializáveis para a API."""
+    probability_columns = [col for col in result.columns if col.startswith("proba_")]
+    items: List[Dict[str, Any]] = []
+    for idx, row in result.iterrows():
+        items.append(
+            {
+                "row_index": int(idx),
+                "input_data": {
+                    column: _normalize_response_value(row[column]) for column in input_columns if column in row.index
+                },
+                "y_pred": _normalize_response_value(row["y_pred"]),
+                "y_pred_display": _normalize_response_value(row["y_pred_display"]),
+                "y_true": _normalize_response_value(row.get("y_true")),
+                "y_true_display": _normalize_response_value(row.get("y_true_display")),
+                "probabilities": {
+                    col.removeprefix("proba_"): _normalize_response_value(row[col]) for col in probability_columns
+                },
+            }
+        )
+    return items

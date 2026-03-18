@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Predição Manual{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Predição manual</h1>
+    <p>Preencha as features abaixo para obter a classe prevista e as probabilidades por classe.</p>
+
+    <form method="post" action="/web/predict-form" class="form-grid">
+        {% for feature in features %}
+        <label class="field">
+            <span>{{ feature }}</span>
+            <input type="text" name="{{ feature }}" value="{{ form_values.get(feature, '') }}" placeholder="Valor numérico">
+        </label>
+        {% endfor %}
+        <div class="actions">
+            <button type="submit">Executar predição</button>
+        </div>
+    </form>
+</section>
+
+{% if prediction %}
+<section class="panel">
+    <h2>Resultado</h2>
+    <p class="result-label">{{ prediction.class_display }} <small>({{ prediction.class_label }})</small></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Classe</th>
+                <th>Probabilidade</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for proba in prediction.probabilities %}
+            <tr>
+                <td>{{ proba.display }}</td>
+                <td>{{ "%.4f"|format(proba.value) if proba.value is not none else "-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endif %}
+{% endblock %}

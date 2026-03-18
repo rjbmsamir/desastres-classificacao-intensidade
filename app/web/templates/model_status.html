@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Status do Modelo{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>Status do modelo</h1>
+    {% if model_info %}
+    <dl class="meta-grid">
+        <div>
+            <dt>Modelo carregado</dt>
+            <dd>{{ "Sim" if model_info.model_loaded else "Não" }}</dd>
+        </div>
+        <div>
+            <dt>Caminho do artefato</dt>
+            <dd>{{ model_info.artifact_path }}</dd>
+        </div>
+        <div>
+            <dt>Run ID</dt>
+            <dd>{{ model_info.run_id or "-" }}</dd>
+        </div>
+        <div>
+            <dt>Algoritmo</dt>
+            <dd>{{ model_info.algorithm or "-" }}</dd>
+        </div>
+    </dl>
+
+    <h2>Classes previstas</h2>
+    <ul class="chip-list">
+        {% for label in model_info.class_labels %}
+        <li>{{ label }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Features esperadas</h2>
+    <ul class="feature-list">
+        {% for feature in model_info.features %}
+        <li>{{ feature }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Metadados disponíveis</h2>
+    <ul class="feature-list">
+        {% for key in model_info.metadata_keys %}
+        <li>{{ key }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>O artefato do modelo não pôde ser carregado.</p>
+    {% endif %}
+</section>
+{% endblock %}

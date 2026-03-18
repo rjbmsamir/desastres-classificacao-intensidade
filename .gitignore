@@ -1,8 +1,11 @@
 # Python
-_pycache_/
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Virtual environment
 .venv/
@@ -22,3 +25,6 @@ venv/
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Docker
+*.tar

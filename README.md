@@ -92,6 +92,48 @@ Funcionalidades:
 - Upload de arquivos CSV/XLSX para gerar novas predições, com download do resultado imediatamente.
 - Visualização das métricas agregadas e histórico de predições recentes gravadas no banco.
 
+## Aplicação web (FastAPI + Jinja2)
+
+```bash
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Acesse:
+
+- `http://localhost:8000/` para a interface web
+- `http://localhost:8000/docs` para a documentação Swagger
+- `http://localhost:8000/health` para healthcheck
+- `http://localhost:8000/model-info` para metadados do modelo
+
+## Docker
+
+Build local:
+
+```bash
+docker build -t projeto-desastres .
+```
+
+Execução local:
+
+```bash
+docker run --rm -p 8000:8000 projeto-desastres
+```
+
+Com variáveis de ambiente:
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e PORT=8000 \
+  -e MODEL_PATH=/app/app/model.joblib \
+  projeto-desastres
+```
+
+Decisão desta etapa:
+
+- `app/model.joblib` vai dentro da imagem para simplificar o runtime do MVP.
+- `data/` não vai para a imagem porque não é necessário para servir a API/web em produção básica.
+- Se for preciso treinar dentro do container no futuro, a pasta de dados pode ser montada por volume ou copiada em uma imagem específica de treino.
+
 ## Banco de dados
 
 O arquivo SQLite padrão (`projeto-desastres.db`) possui as tabelas:

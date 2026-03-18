@@ -18,6 +18,18 @@ class ModelMetadataResponse(BaseModel):
     class_labels: List[str]
 
 
+class ModelInfoResponse(BaseModel):
+    """Metadados expandidos do artefato do modelo."""
+
+    model_loaded: bool
+    artifact_path: str
+    run_id: Optional[int] = None
+    class_labels: List[str]
+    features: List[str]
+    metadata_keys: List[str]
+    algorithm: Optional[str] = None
+
+
 class PredictionRequest(BaseModel):
     """Payload de inferência em lote baseado em registros JSON."""
 
@@ -36,6 +48,8 @@ class PredictionRequest(BaseModel):
 class PredictionItemResponse(BaseModel):
     """Representa uma linha prevista pela API."""
 
+    row_index: int
+    input_data: Optional[Dict[str, Any]] = None
     y_pred: str
     y_pred_display: str
     y_true: Optional[str] = None
@@ -46,4 +60,6 @@ class PredictionItemResponse(BaseModel):
 class PredictionResponse(BaseModel):
     """Resposta da inferência em lote."""
 
+    total_records: int
+    total_processed: int
     predictions: List[PredictionItemResponse]

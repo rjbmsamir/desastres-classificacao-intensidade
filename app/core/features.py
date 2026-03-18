@@ -32,6 +32,14 @@ DISPLAY_LABELS = {
 }
 
 
+class MissingColumnsError(ValueError):
+    """Disparado quando o payload não contém todas as features obrigatórias."""
+
+    def __init__(self, missing_columns: List[str]) -> None:
+        self.missing_columns = missing_columns
+        super().__init__(f"Colunas faltando: {missing_columns}")
+
+
 def check_columns(df) -> List[str]:
     """Retorna as features obrigatórias ausentes."""
     return [column for column in FEATURES if column not in df.columns]
@@ -58,7 +66,7 @@ def ensure_valid_features(df) -> None:
     """Valida a presença das features obrigatórias."""
     missing = check_columns(df)
     if missing:
-        raise ValueError(f"Colunas faltando: {missing}")
+        raise MissingColumnsError(missing)
 
 
 def select_feature_frame(df):
