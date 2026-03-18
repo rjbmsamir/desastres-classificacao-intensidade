@@ -1,4 +1,5 @@
 """Rotas web simples para operação manual do sistema."""
+from pathlib import Path
 from __future__ import annotations
 
 import io
